@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { convertQuantity } from "@/lib/conversions";
+import { createNotification } from "@/lib/notifications";
 
 export async function GET(req) {
   try {
@@ -56,9 +57,21 @@ export async function POST(req) {
     }
 
     if (status === "REJECTED") {
-      const updated = await prisma.quotation.update({
-        where: { id },
-        data: { status: "REJECTED" },
+      const updated = await prisma.$transaction(async (tx) => {
+        const q = await tx.quotation.update({
+          where: { id },
+          data: { status: "REJECTED" },
+        });
+
+        // Notify the submitting user (buyer or seller)
+        await createNotification(tx, {
+          userId: quotation.sellerId,
+          type: "ORDER_REJECTED",
+          title: "Order Rejected",
+          message: `Your order/quotation #${id.slice(0, 8).toUpperCase()} (₹${Number(quotation.totalPrice).toFixed(2)}) has been reviewed and rejected by the admin.`,
+        });
+
+        return q;
       });
       return NextResponse.json(updated);
     }
@@ -86,10 +99,20 @@ export async function POST(req) {
         });
       }
 
-      return await tx.quotation.update({
+      const q = await tx.quotation.update({
         where: { id },
         data: { status: "APPROVED" },
       });
+
+      // Notify the submitting user (buyer or seller)
+      await createNotification(tx, {
+        userId: quotation.sellerId,
+        type: "ORDER_APPROVED",
+        title: "Order Approved",
+        message: `Your order/quotation #${id.slice(0, 8).toUpperCase()} (₹${Number(quotation.totalPrice).toFixed(2)}) has been approved. Stock has been allocated.`,
+      });
+
+      return q;
     });
 
     return NextResponse.json(result);

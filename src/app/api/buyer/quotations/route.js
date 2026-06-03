@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { convertQuantity, calculateUnitPrice, calculateTotalPrice } from "@/lib/conversions";
+import { createNotification, notifyAllAdmins } from "@/lib/notifications";
 
 export async function GET(req) {
   try {
@@ -95,6 +96,21 @@ export async function POST(req) {
 
       await tx.cartItem.deleteMany({
         where: { userId: session.user.id },
+      });
+
+      // Notify the buyer: order received
+      await createNotification(tx, {
+        userId: session.user.id,
+        type: "ORDER_SUBMITTED",
+        title: "Order Submitted",
+        message: `Your purchase order #${quotation.id.slice(0, 8).toUpperCase()} (₹${finalTotal.toFixed(2)}) has been submitted and is awaiting admin review.`,
+      });
+
+      // Notify all admins: new order pending
+      await notifyAllAdmins(tx, {
+        type: "NEW_ORDER",
+        title: "New Purchase Order",
+        message: `Buyer ${session.user.name} (${session.user.email}) submitted order #${quotation.id.slice(0, 8).toUpperCase()} for ₹${finalTotal.toFixed(2)} — awaiting your review.`,
       });
 
       return quotation;

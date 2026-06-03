@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import NotificationBell from "@/app/components/NotificationBell";
 import {
   Search,
   ShoppingCart,
@@ -12,7 +13,6 @@ import {
   PlusCircle,
   FileText,
   Settings,
-  Bell,
   Scale,
   Package,
   Activity,
@@ -317,7 +317,7 @@ export default function BuyerPage() {
                 Corporate Store
               </span>
               <button className="p-2 hover:bg-slate-100 rounded-xl relative cursor-pointer text-slate-655">
-                <Bell className="w-4 h-4" />
+                <NotificationBell />
               </button>
               <button className="p-2 hover:bg-slate-100 rounded-xl cursor-pointer text-slate-655">
                 <Settings className="w-4 h-4" />

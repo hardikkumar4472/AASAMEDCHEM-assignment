@@ -3,7 +3,33 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { convertQuantity, calculateUnitPrice, calculateTotalPrice } from "@/lib/conversions";
+import { createNotification, notifyAllAdmins } from "@/lib/notifications";
 
+// GET /api/seller/quotations — seller's quotation/order history
+export async function GET(req) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== "SELLER") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const quotations = await prisma.quotation.findMany({
+      where: { sellerId: session.user.id },
+      include: {
+        items: {
+          include: { product: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json(quotations);
+  } catch (err) {
+    return NextResponse.json({ error: "Failed to fetch quotation history" }, { status: 500 });
+  }
+}
+
+// POST /api/seller/quotations — submit cart as a new quotation
 export async function POST(req) {
   try {
     const session = await getServerSession(authOptions);
@@ -72,6 +98,21 @@ export async function POST(req) {
 
       await tx.cartItem.deleteMany({
         where: { userId: session.user.id },
+      });
+
+      // Notify the seller: quotation received
+      await createNotification(tx, {
+        userId: session.user.id,
+        type: "ORDER_SUBMITTED",
+        title: "Quotation Submitted",
+        message: `Your quotation #${quotation.id.slice(0, 8).toUpperCase()} (₹${finalTotal.toFixed(2)}) has been submitted and is awaiting admin review.`,
+      });
+
+      // Notify all admins: new quotation pending
+      await notifyAllAdmins(tx, {
+        type: "NEW_ORDER",
+        title: "New Seller Quotation",
+        message: `Seller ${session.user.name} (${session.user.email}) submitted quotation #${quotation.id.slice(0, 8).toUpperCase()} for ₹${finalTotal.toFixed(2)} — awaiting your review.`,
       });
 
       return quotation;

@@ -13,6 +13,7 @@ import {
   User,
   AlertCircle
 } from "lucide-react";
+import NotificationBell from "@/app/components/NotificationBell";
 
 export default function AdminQuotationsPage() {
   const router = useRouter();
@@ -87,6 +88,7 @@ export default function AdminQuotationsPage() {
           <span className="text-sm font-medium bg-teal-900 px-3 py-1 rounded-full text-teal-100">
             Admin Panel
           </span>
+          <NotificationBell />
           <button
             onClick={handleLogout}
             className="text-teal-200 hover:text-white flex items-center space-x-1 text-sm bg-teal-900 hover:bg-teal-800 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"

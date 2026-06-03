@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import NotificationBell from "@/app/components/NotificationBell";
 import {
   Plus,
   Edit2,
@@ -20,7 +21,6 @@ import {
   Shield,
   Search,
   Settings,
-  Bell,
   Activity,
   History,
   TrendingDown,
@@ -553,10 +553,7 @@ export default function AdminPage() {
                 />
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
               </div>
-              <button className="p-2 hover:bg-slate-100 rounded-xl transition-colors relative cursor-pointer text-slate-650">
-                <Bell className="w-4 h-4" />
-                <span className="w-1.5 h-1.5 bg-red-500 rounded-full absolute top-2.5 right-2.5"></span>
-              </button>
+              <NotificationBell />
               <button className="p-2 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer text-slate-650">
                 <Settings className="w-4 h-4" />
               </button>

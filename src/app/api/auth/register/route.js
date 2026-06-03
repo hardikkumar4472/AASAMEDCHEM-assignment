@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth";
+import { notifyAllAdmins } from "@/lib/notifications";
 
 export async function POST(req) {
   try {
@@ -33,13 +34,20 @@ export async function POST(req) {
 
     const hashedPassword = await hashPassword(password);
 
-    await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         name,
         email: email.toLowerCase(),
         passwordHash: hashedPassword,
         role,
       },
+    });
+
+    // Notify admins about the new registration
+    await notifyAllAdmins(prisma, {
+      type: "NEW_USER",
+      title: "New User Registered",
+      message: `${name} (${email.toLowerCase()}) registered as a ${role}.`,
     });
 
     return NextResponse.json({ success: true });

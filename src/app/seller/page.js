@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import NotificationBell from "@/app/components/NotificationBell";
 import {
   Search,
   ShoppingCart,
@@ -12,15 +13,13 @@ import {
   PlusCircle,
   FileText,
   Settings,
-  Bell,
   Scale,
   Package,
   Activity,
   History,
   Trash2,
   Check
-} from "lucide-react";
-import { convertQuantity, calculateUnitPrice, calculateTotalPrice } from "@/lib/conversions";
+} from "lucide-react";import { convertQuantity, calculateUnitPrice, calculateTotalPrice } from "@/lib/conversions";
 
 const getCasNumber = (name) => {
   const n = name.toLowerCase();
@@ -244,6 +243,13 @@ export default function SellerPage() {
                   <ShoppingCart className="w-4 h-4" />
                   <span>Review Checkout</span>
                 </button>
+                <button
+                  onClick={() => router.push("/seller/orders")}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-teal-200 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center space-x-2.5"
+                >
+                  <History className="w-4 h-4" />
+                  <span>Quotation History</span>
+                </button>
               </nav>
             </div>
 
@@ -310,7 +316,7 @@ export default function SellerPage() {
                 Active Catalog
               </span>
               <button className="p-2 hover:bg-slate-100 rounded-xl relative cursor-pointer text-slate-655">
-                <Bell className="w-4 h-4" />
+                <NotificationBell />
               </button>
               <button className="p-2 hover:bg-slate-100 rounded-xl cursor-pointer text-slate-655">
                 <Settings className="w-4 h-4" />
