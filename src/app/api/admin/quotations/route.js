@@ -4,6 +4,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { convertQuantity } from "@/lib/conversions";
 import { createNotification } from "@/lib/notifications";
+import { adminActionLimiter, getIP, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function GET(req) {
   try {
@@ -31,6 +32,10 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
+  const ip = getIP(req);
+  const limit = adminActionLimiter.check(ip);
+  if (!limit.success) return rateLimitResponse(limit.resetAt);
+
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
@@ -62,8 +67,6 @@ export async function POST(req) {
           where: { id },
           data: { status: "REJECTED" },
         });
-
-        // Notify the submitting user (buyer or seller)
         await createNotification(tx, {
           userId: quotation.sellerId,
           type: "ORDER_REJECTED",
@@ -103,8 +106,6 @@ export async function POST(req) {
         where: { id },
         data: { status: "APPROVED" },
       });
-
-      // Notify the submitting user (buyer or seller)
       await createNotification(tx, {
         userId: quotation.sellerId,
         type: "ORDER_APPROVED",

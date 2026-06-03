@@ -77,12 +77,12 @@ export default function BuyerCheckoutPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center font-sans p-6">
-        <div className="max-w-md w-full bg-white rounded-2xl p-8 border border-gray-100 shadow-xl text-center space-y-4">
-          <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-            <CheckCircle className="w-10 h-10" />
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center font-sans p-4 sm:p-6">
+        <div className="max-w-md w-full bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-xl text-center space-y-4">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+            <CheckCircle className="w-8 sm:w-10 h-8 sm:h-10" />
           </div>
-          <h2 className="text-2xl font-bold text-teal-950">Order Request Submitted!</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-teal-950">Order Request Submitted!</h2>
           <p className="text-gray-500 text-sm">
             Your purchase order has been sent to the administrators for review and approval.
           </p>
@@ -94,22 +94,21 @@ export default function BuyerCheckoutPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <header className="bg-teal-950 text-white py-4 px-6 flex justify-between items-center shadow-md">
-        <div className="flex items-center space-x-3">
-          <Link href="/buyer" className="text-teal-200 hover:text-white flex items-center space-x-1 text-sm bg-teal-900 px-3 py-1.5 rounded-lg transition-colors cursor-pointer">
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Catalog</span>
-          </Link>
-        </div>
-        <h1 className="text-lg font-bold tracking-wide">Review & Place Order</h1>
-        <div className="w-24"></div>
+      <header className="bg-teal-950 text-white py-3 sm:py-4 px-4 sm:px-6 flex justify-between items-center shadow-md">
+        <Link href="/buyer" className="text-teal-200 hover:text-white flex items-center space-x-1 text-xs sm:text-sm bg-teal-900 px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors cursor-pointer">
+          <ArrowLeft className="w-4 h-4" />
+          <span className="hidden sm:inline">Back to Catalog</span>
+          <span className="sm:hidden">Back</span>
+        </Link>
+        <h1 className="text-sm sm:text-lg font-bold tracking-wide">Review & Place Order</h1>
+        <div className="w-16 sm:w-24"></div>
       </header>
 
-      <main className="flex-1 max-w-4xl w-full mx-auto p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-6">
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-teal-950 mb-4 pb-2 border-b border-gray-100 flex items-center space-x-2">
-              <FileText className="w-5 h-5 text-teal-800" />
+      <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8">
+        <div className="md:col-span-2 space-y-4 sm:space-y-6">
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6 shadow-sm">
+            <h3 className="text-base sm:text-lg font-bold text-teal-950 mb-3 sm:mb-4 pb-2 border-b border-gray-100 flex items-center space-x-2">
+              <FileText className="w-4 sm:w-5 h-4 sm:h-5 text-teal-800" />
               <span>Items Summary</span>
             </h3>
 
@@ -127,7 +126,7 @@ export default function BuyerCheckoutPage() {
                   const itemTotal = calculateTotalPrice(item.quantity, unitPrice);
 
                   return (
-                    <div key={item.id} className="py-4 flex justify-between items-center">
+                    <div key={item.id} className="py-3 sm:py-4 flex justify-between items-center">
                       <div>
                         <h4 className="font-bold text-teal-950 text-sm">
                           {item.product.name}
@@ -136,7 +135,7 @@ export default function BuyerCheckoutPage() {
                           {item.quantity} {item.unit} @ ₹{unitPrice.toFixed(2)}/{item.unit}
                         </p>
                       </div>
-                      <span className="font-bold text-teal-900 text-sm">
+                      <span className="font-bold text-teal-900 text-sm whitespace-nowrap ml-3">
                         ₹{itemTotal.toFixed(2)}
                       </span>
                     </div>
@@ -146,11 +145,11 @@ export default function BuyerCheckoutPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-teal-950 mb-4 pb-2 border-b border-gray-100">
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6 shadow-sm">
+            <h3 className="text-base sm:text-lg font-bold text-teal-950 mb-3 sm:mb-4 pb-2 border-b border-gray-100">
               Order Remarks
             </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
               <div>
                 <label className="text-xs font-semibold text-gray-700 block mb-1.5">
                   Order Notes / Shipping Info (Optional)
@@ -159,7 +158,7 @@ export default function BuyerCheckoutPage() {
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
                   placeholder="Provide any instructions, preferred shipping details, or packaging requests..."
-                  rows={4}
+                  rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-slate-900 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-teal-600 focus:border-teal-600"
                 />
               </div>
@@ -181,8 +180,8 @@ export default function BuyerCheckoutPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm h-fit space-y-6">
-          <h3 className="text-lg font-bold text-teal-950 pb-2 border-b border-gray-100">
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6 shadow-sm h-fit space-y-4 sm:space-y-6">
+          <h3 className="text-base sm:text-lg font-bold text-teal-950 pb-2 border-b border-gray-100">
             Order Total
           </h3>
           <div className="space-y-3 text-sm">

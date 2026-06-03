@@ -2,8 +2,14 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth";
 import { notifyAllAdmins } from "@/lib/notifications";
+import { registerLimiter, getIP, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function POST(req) {
+  // Rate limit: 5 registrations per hour per IP
+  const ip = getIP(req);
+  const limit = registerLimiter.check(ip);
+  if (!limit.success) return rateLimitResponse(limit.resetAt);
+
   try {
     const { name, email, password, role } = await req.json();
 

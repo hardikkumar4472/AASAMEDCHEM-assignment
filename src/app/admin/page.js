@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import NotificationBell from "@/app/components/NotificationBell";
+import MobileSidebar from "@/app/components/MobileSidebar";
 import {
   Plus,
   Edit2,
@@ -20,12 +21,13 @@ import {
   FileText,
   Shield,
   Search,
-  Settings,
+
   Activity,
   History,
   TrendingDown,
   Layers,
-  Sparkles
+  Sparkles,
+  Menu
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -33,6 +35,7 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("analytics");
   const [products, setProducts] = useState([]);
   const [analytics, setAnalytics] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const [sku, setSku] = useState("");
   const [name, setName] = useState("");
@@ -209,6 +212,82 @@ export default function AdminPage() {
 
   const lowStockProducts = products.filter(p => Number(p.currentStockBaseUnit) < 1000);
 
+  const sidebarContent = (
+    <aside className="w-full h-full bg-cyan-950 text-white p-6 flex flex-col justify-between">
+      <div className="space-y-6">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center font-black text-white text-2xl shadow-lg shadow-emerald-500/15">
+            A
+          </div>
+          <div>
+            <h1 className="text-lg font-black tracking-wider bg-gradient-to-r from-white to-emerald-350 bg-clip-text text-transparent">AasaMedChem</h1>
+            <p className="text-[9px] text-emerald-400 font-bold tracking-widest uppercase">Solutions. Trust. Innovation.</p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+          <div className="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/25 shadow-inner">
+            AD
+          </div>
+          <div>
+            <span className="text-xs font-bold block text-white">Aasa Admin</span>
+            <span className="text-[10px] text-emerald-400/80 block font-semibold">Super Administrator</span>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-[9px] font-bold text-teal-400/60 uppercase tracking-widest mb-3">
+            Navigation
+          </p>
+          <nav className="space-y-1">
+            {[
+              { id: "analytics", label: "Dashboard", icon: BarChart2 },
+              { id: "products", label: "Products", icon: Package },
+              { id: "users", label: "Users", icon: Users },
+              { id: "inventory", label: "Inventory", icon: Layers },
+              { id: "quotations", label: "Orders / Quotations", icon: FileText },
+              { id: "reports", label: "Reports", icon: TrendingUp },
+
+              { id: "audit", label: "Audit Logs", icon: History }
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (item.id === "quotations") {
+                      router.push("/admin/quotations");
+                    } else {
+                      setActiveTab(item.id);
+                    }
+                    setSidebarOpen(false);
+                  }}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center space-x-2.5 ${
+                    isActive
+                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-700/20 scale-[1.02]"
+                      : "text-teal-200 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+
+      <button
+        onClick={handleLogout}
+        className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-teal-300 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center space-x-2.5 mt-8 border-t border-white/5 pt-4"
+      >
+        <LogOut className="w-4 h-4" />
+        <span>Logout Account</span>
+      </button>
+    </aside>
+  );
+
   const renderAnalytics = () => {
     if (!analytics) {
       return (
@@ -224,70 +303,70 @@ export default function AdminPage() {
     const maxVal = Math.max(...trend.map(t => t.total), 1000);
 
     return (
-      <div className="space-y-8 animate-fade-in">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-            <div className="space-y-2">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Total Products</span>
-              <span className="text-3xl font-black text-cyan-950 block">{metrics.totalProducts}</span>
-              <span className="text-[10px] text-emerald-600 font-bold flex items-center space-x-1">
-                <TrendingUp className="w-3.5 h-3.5 mr-0.5" />
+      <div className="space-y-6 sm:space-y-8 animate-fade-in">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+            <div className="space-y-1 sm:space-y-2">
+              <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Total Products</span>
+              <span className="text-xl sm:text-3xl font-black text-cyan-950 block">{metrics.totalProducts}</span>
+              <span className="text-[9px] sm:text-[10px] text-emerald-600 font-bold flex items-center space-x-1">
+                <TrendingUp className="w-3 sm:w-3.5 h-3 sm:h-3.5 mr-0.5" />
                 <span>+12 this week</span>
               </span>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center shadow-inner">
-              <Package className="w-6 h-6" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center shadow-inner">
+              <Package className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-            <div className="space-y-2">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Total Orders</span>
-              <span className="text-3xl font-black text-cyan-950 block">{metrics.approvedQuotations}</span>
-              <span className="text-[10px] text-emerald-600 font-bold flex items-center space-x-1">
-                <TrendingUp className="w-3.5 h-3.5 mr-0.5" />
+          <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+            <div className="space-y-1 sm:space-y-2">
+              <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Total Orders</span>
+              <span className="text-xl sm:text-3xl font-black text-cyan-950 block">{metrics.approvedQuotations}</span>
+              <span className="text-[9px] sm:text-[10px] text-emerald-600 font-bold flex items-center space-x-1">
+                <TrendingUp className="w-3 sm:w-3.5 h-3 sm:h-3.5 mr-0.5" />
                 <span>+18 this week</span>
               </span>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner">
-              <Activity className="w-6 h-6" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner">
+              <Activity className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-            <div className="space-y-2">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Total Quotations</span>
-              <span className="text-3xl font-black text-cyan-950 block">{metrics.totalQuotations}</span>
-              <span className="text-[10px] text-emerald-600 font-bold flex items-center space-x-1">
-                <TrendingUp className="w-3.5 h-3.5 mr-0.5" />
+          <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+            <div className="space-y-1 sm:space-y-2">
+              <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Total Quotations</span>
+              <span className="text-xl sm:text-3xl font-black text-cyan-950 block">{metrics.totalQuotations}</span>
+              <span className="text-[9px] sm:text-[10px] text-emerald-600 font-bold flex items-center space-x-1">
+                <TrendingUp className="w-3 sm:w-3.5 h-3 sm:h-3.5 mr-0.5" />
                 <span>+3 this week</span>
               </span>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-inner">
-              <FileText className="w-6 h-6" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-inner">
+              <FileText className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-            <div className="space-y-2">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Total Revenue (INR)</span>
-              <span className="text-2xl font-black text-cyan-950 block">₹{metrics.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              <span className="text-[10px] text-emerald-600 font-bold flex items-center space-x-1">
-                <TrendingUp className="w-3.5 h-3.5 mr-0.5" />
-                <span>+22.5% this week</span>
+          <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+            <div className="space-y-1 sm:space-y-2">
+              <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Revenue (INR)</span>
+              <span className="text-lg sm:text-2xl font-black text-cyan-950 block">₹{metrics.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <span className="text-[9px] sm:text-[10px] text-emerald-600 font-bold flex items-center space-x-1">
+                <TrendingUp className="w-3 sm:w-3.5 h-3 sm:h-3.5 mr-0.5" />
+                <span>+22.5%</span>
               </span>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shadow-inner">
-              <DollarSign className="w-6 h-6" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shadow-inner">
+              <DollarSign className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-base font-black text-cyan-950 flex items-center space-x-2">
-                <TrendingUp className="w-5 h-5 text-teal-700" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
+            <div className="flex justify-between items-center mb-4 sm:mb-6">
+              <h3 className="text-sm sm:text-base font-black text-cyan-950 flex items-center space-x-2">
+                <TrendingUp className="w-4 sm:w-5 h-4 sm:h-5 text-teal-700" />
                 <span>Recent Orders</span>
               </h3>
               <button onClick={() => setActiveTab("products")} className="text-xs font-bold text-teal-600 hover:text-teal-700">
@@ -302,20 +381,20 @@ export default function AdminPage() {
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider">
-                      <th className="p-3">Order ID</th>
-                      <th className="p-3">Customer</th>
-                      <th className="p-3">Total (INR)</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3">Date</th>
+                      <th className="p-2 sm:p-3">Order ID</th>
+                      <th className="p-2 sm:p-3 hidden sm:table-cell">Customer</th>
+                      <th className="p-2 sm:p-3">Total</th>
+                      <th className="p-2 sm:p-3">Status</th>
+                      <th className="p-2 sm:p-3 hidden md:table-cell">Date</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 font-medium text-slate-600">
                     {orders.slice(0, 5).map((order) => (
                       <tr key={order.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="p-3 font-mono text-cyan-950 font-bold">{order.id.slice(0, 8).toUpperCase()}</td>
-                        <td className="p-3 font-bold text-cyan-950">{order.userName}</td>
-                        <td className="p-3 font-bold text-teal-900">₹{order.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                        <td className="p-3">
+                        <td className="p-2 sm:p-3 font-mono text-cyan-950 font-bold text-[10px] sm:text-xs">{order.id.slice(0, 8).toUpperCase()}</td>
+                        <td className="p-2 sm:p-3 font-bold text-cyan-950 hidden sm:table-cell">{order.userName}</td>
+                        <td className="p-2 sm:p-3 font-bold text-teal-900">₹{order.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="p-2 sm:p-3">
                           <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${
                             order.status === "APPROVED"
                               ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
@@ -326,7 +405,7 @@ export default function AdminPage() {
                             {order.status === "APPROVED" ? "Confirmed" : order.status === "PENDING" ? "Pending" : "Cancelled"}
                           </span>
                         </td>
-                        <td className="p-3 text-slate-400 font-semibold">{new Date(order.createdAt).toLocaleDateString()}</td>
+                        <td className="p-2 sm:p-3 text-slate-400 font-semibold hidden md:table-cell">{new Date(order.createdAt).toLocaleDateString()}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -335,11 +414,11 @@ export default function AdminPage() {
             )}
           </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
             <div>
-              <h3 className="text-base font-black text-cyan-950 mb-6">Inventory Overview</h3>
-              <div className="flex justify-center mb-6 relative">
-                <div className="w-36 h-36 flex items-center justify-center">
+              <h3 className="text-sm sm:text-base font-black text-cyan-950 mb-4 sm:mb-6">Inventory Overview</h3>
+              <div className="flex justify-center mb-4 sm:mb-6 relative">
+                <div className="w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center">
                   <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
                     <circle cx="18" cy="18" r="15.915" fill="none" stroke="#f8fafc" strokeWidth="4.5" />
                     <circle cx="18" cy="18" r="15.915" fill="none" stroke="#10b981" strokeWidth="4.5" strokeDasharray="70 30" strokeDashoffset="0" />
@@ -347,7 +426,7 @@ export default function AdminPage() {
                     <circle cx="18" cy="18" r="15.915" fill="none" stroke="#ef4444" strokeWidth="4.5" strokeDasharray="12 88" strokeDashoffset="-88" />
                   </svg>
                   <div className="absolute flex flex-col items-center">
-                    <span className="text-3xl font-black text-cyan-950">{metrics.totalProducts}</span>
+                    <span className="text-2xl sm:text-3xl font-black text-cyan-950">{metrics.totalProducts}</span>
                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Total</span>
                   </div>
                 </div>
@@ -386,8 +465,8 @@ export default function AdminPage() {
               <div className="space-y-2 max-h-24 overflow-y-auto custom-scrollbar">
                 {lowStockProducts.slice(0, 3).map(p => (
                   <div key={p.id} className="flex justify-between items-center text-[10px] bg-slate-50 p-2 rounded-lg border border-slate-100">
-                    <span className="font-bold text-cyan-950">{p.name}</span>
-                    <span className="text-red-600 font-bold">{Number(p.currentStockBaseUnit).toLocaleString()} {p.baseUnit} left</span>
+                    <span className="font-bold text-cyan-950 truncate mr-2">{p.name}</span>
+                    <span className="text-red-600 font-bold whitespace-nowrap">{Number(p.currentStockBaseUnit).toLocaleString()} {p.baseUnit} left</span>
                   </div>
                 ))}
               </div>
@@ -408,9 +487,9 @@ export default function AdminPage() {
     }
 
     return (
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden animate-fade-in">
-        <div className="px-6 py-5 border-b border-slate-50 flex justify-between items-center">
-          <h3 className="text-base font-black text-cyan-950">System Registered Users</h3>
+      <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm overflow-hidden animate-fade-in">
+        <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-50 flex justify-between items-center">
+          <h3 className="text-sm sm:text-base font-black text-cyan-950">System Registered Users</h3>
           <span className="bg-teal-50 text-teal-850 text-xs px-3 py-1 rounded-full font-bold">
             {analytics.users.length} Users
           </span>
@@ -419,18 +498,21 @@ export default function AdminPage() {
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider">
-                <th className="p-4">Name</th>
-                <th className="p-4">Email</th>
-                <th className="p-4">Role Permission</th>
-                <th className="p-4">Account Created</th>
+                <th className="p-3 sm:p-4">Name</th>
+                <th className="p-3 sm:p-4 hidden sm:table-cell">Email</th>
+                <th className="p-3 sm:p-4">Role</th>
+                <th className="p-3 sm:p-4 hidden md:table-cell">Created</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-650 font-medium">
               {analytics.users.map((user) => (
                 <tr key={user.id} className="hover:bg-slate-50/55 transition-colors">
-                  <td className="p-4 font-bold text-cyan-950">{user.name}</td>
-                  <td className="p-4 font-mono text-slate-500">{user.email}</td>
-                  <td className="p-4 font-bold">
+                  <td className="p-3 sm:p-4">
+                    <span className="font-bold text-cyan-950 block">{user.name}</span>
+                    <span className="text-[10px] text-slate-400 sm:hidden block">{user.email}</span>
+                  </td>
+                  <td className="p-3 sm:p-4 font-mono text-slate-500 hidden sm:table-cell">{user.email}</td>
+                  <td className="p-3 sm:p-4 font-bold">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                       user.role === "ADMIN"
                         ? "bg-purple-50 text-purple-700 border border-purple-200"
@@ -442,7 +524,7 @@ export default function AdminPage() {
                       {user.role}
                     </span>
                   </td>
-                  <td className="p-4 text-slate-400 font-semibold">{new Date(user.createdAt).toLocaleDateString()}</td>
+                  <td className="p-3 sm:p-4 text-slate-400 font-semibold hidden md:table-cell">{new Date(user.createdAt).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -455,97 +537,37 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       {notification && (
-        <div className="fixed bottom-6 right-6 bg-cyan-950 text-white px-5 py-3 rounded-xl shadow-2xl z-50 transition-all border border-emerald-500/50 flex items-center space-x-2 animate-bounce">
-          <Sparkles className="w-4 h-4 text-emerald-400" />
+        <div className="fixed bottom-6 right-4 sm:right-6 bg-cyan-950 text-white px-4 sm:px-5 py-3 rounded-xl shadow-2xl z-50 transition-all border border-emerald-500/50 flex items-center space-x-2 animate-bounce max-w-[90vw]">
+          <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
           <span className="text-xs font-bold tracking-wide">{notification}</span>
         </div>
       )}
 
       <div className="flex-1 flex flex-col lg:flex-row">
-        <aside className="w-full lg:w-64 bg-cyan-950 text-white p-6 flex flex-col justify-between border-t border-cyan-900/50 lg:border-t-0 shrink-0">
-          <div className="space-y-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center font-black text-white text-2xl shadow-lg shadow-emerald-500/15">
-                A
-              </div>
-              <div>
-                <h1 className="text-lg font-black tracking-wider bg-gradient-to-r from-white to-emerald-350 bg-clip-text text-transparent">AasaMedChem</h1>
-                <p className="text-[9px] text-emerald-400 font-bold tracking-widest uppercase">Solutions. Trust. Innovation.</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3 bg-white/5 p-3 rounded-2xl border border-white/10">
-              <div className="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/25 shadow-inner">
-                AD
-              </div>
-              <div>
-                <span className="text-xs font-bold block text-white">Aasa Admin</span>
-                <span className="text-[10px] text-emerald-400/80 block font-semibold">Super Administrator</span>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-[9px] font-bold text-teal-400/60 uppercase tracking-widest mb-3">
-                Navigation
-              </p>
-              <nav className="space-y-1">
-                {[
-                  { id: "analytics", label: "Dashboard", icon: BarChart2 },
-                  { id: "products", label: "Products", icon: Package },
-                  { id: "users", label: "Users", icon: Users },
-                  { id: "inventory", label: "Inventory", icon: Layers },
-                  { id: "quotations", label: "Orders / Quotations", icon: FileText },
-                  { id: "reports", label: "Reports", icon: TrendingUp },
-                  { id: "settings", label: "Settings", icon: Settings },
-                  { id: "audit", label: "Audit Logs", icon: History }
-                ].map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        if (item.id === "quotations") {
-                          router.push("/admin/quotations");
-                        } else {
-                          setActiveTab(item.id);
-                        }
-                      }}
-                      className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center space-x-2.5 ${
-                        isActive
-                          ? "bg-emerald-600 text-white shadow-md shadow-emerald-700/20 scale-[1.02]"
-                          : "text-teal-200 hover:bg-white/5 hover:text-white"
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span>{item.label}</span>
-                    </button>
-                  );
-                })}
-              </nav>
-            </div>
-          </div>
-
-          <button
-            onClick={handleLogout}
-            className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-teal-300 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center space-x-2.5 mt-8 border-t border-white/5 pt-4"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Logout Account</span>
-          </button>
-        </aside>
+        <MobileSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)}>
+          {sidebarContent}
+        </MobileSidebar>
 
         <main className="flex-1 flex flex-col min-w-0">
-          <header className="bg-white border-b border-slate-100 py-4 px-6 md:px-8 flex justify-between items-center shadow-sm sticky top-0 z-20">
-            <div className="flex flex-col">
-              <h2 className="text-lg font-black text-cyan-950 tracking-tight">
-                {activeTab === "analytics" ? "Dashboard" : activeTab === "products" ? "Products Management" : "Administration Workspace"}
-              </h2>
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Welcome back, Admin 👋</span>
+          <header className="bg-white border-b border-slate-100 py-3 sm:py-4 px-4 sm:px-6 md:px-8 flex justify-between items-center shadow-sm sticky top-0 z-20">
+            <div className="flex items-center space-x-3">
+              {/* Mobile hamburger */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 rounded-xl hover:bg-slate-100 transition-colors text-slate-600"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div className="flex flex-col">
+                <h2 className="text-base sm:text-lg font-black text-cyan-950 tracking-tight">
+                  {activeTab === "analytics" ? "Dashboard" : activeTab === "products" ? "Products" : "Admin"}
+                </h2>
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block hidden sm:block">Welcome back, Admin 👋</span>
+              </div>
             </div>
             
-            <div className="flex items-center space-x-4 text-slate-500">
-              <div className="relative w-64 hidden md:block">
+            <div className="flex items-center space-x-2 sm:space-x-4 text-slate-500">
+              <div className="relative w-48 sm:w-64 hidden md:block">
                 <input
                   type="text"
                   placeholder="Search products, orders..."
@@ -554,45 +576,43 @@ export default function AdminPage() {
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
               </div>
               <NotificationBell />
-              <button className="p-2 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer text-slate-650">
-                <Settings className="w-4 h-4" />
-              </button>
+
             </div>
           </header>
 
-          <div className="flex-1 p-6 md:p-8 overflow-y-auto max-h-[calc(100vh-65px)] custom-scrollbar">
+          <div className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto max-h-[calc(100vh-65px)] custom-scrollbar">
             {activeTab === "analytics" && renderAnalytics()}
             
             {activeTab === "users" && renderUsers()}
 
             {activeTab === "products" && (
-              <div className="space-y-6 animate-fade-in">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-base font-black text-cyan-950">Chemical Catalog Registry</h3>
+              <div className="space-y-4 sm:space-y-6 animate-fade-in">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                  <h3 className="text-sm sm:text-base font-black text-cyan-950">Chemical Catalog Registry</h3>
                   <button
                     onClick={() => {
                       resetForm();
                       setShowAddModal(true);
                     }}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-md hover:shadow-lg shadow-emerald-500/10 hover:scale-[1.02]"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-md hover:shadow-lg shadow-emerald-500/10 hover:scale-[1.02] w-full sm:w-auto justify-center sm:justify-start"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Add Product</span>
                   </button>
                 </div>
 
-                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse text-xs">
                       <thead>
                         <tr className="bg-slate-50 border-b border-slate-150 text-slate-500 font-bold uppercase tracking-wider">
-                          <th className="p-4">SKU</th>
-                          <th className="p-4">Product Name</th>
-                          <th className="p-4">Base Unit</th>
-                          <th className="p-4">Base Price</th>
-                          <th className="p-4">Density (g/ml)</th>
-                          <th className="p-4">Current Stock</th>
-                          <th className="p-4 text-center">Actions</th>
+                          <th className="p-3 sm:p-4 hidden sm:table-cell">SKU</th>
+                          <th className="p-3 sm:p-4">Product</th>
+                          <th className="p-3 sm:p-4 hidden md:table-cell">Unit</th>
+                          <th className="p-3 sm:p-4">Price</th>
+                          <th className="p-3 sm:p-4 hidden lg:table-cell">Density</th>
+                          <th className="p-3 sm:p-4">Stock</th>
+                          <th className="p-3 sm:p-4 text-center">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 text-slate-650 font-medium">
@@ -600,19 +620,22 @@ export default function AdminPage() {
                           const isLowStock = Number(product.currentStockBaseUnit) < 1000;
                           return (
                             <tr key={product.id} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="p-4 font-mono text-[10px] text-slate-400 font-bold">{product.sku}</td>
-                              <td className="p-4 font-bold text-cyan-950">{product.name}</td>
-                              <td className="p-4 text-[10px] font-bold uppercase text-slate-400">{product.baseUnit}</td>
-                              <td className="p-4 font-bold text-teal-900">₹{Number(product.basePrice).toFixed(2)}</td>
-                              <td className="p-4 font-mono text-[10px]">{Number(product.density).toFixed(3)}</td>
-                              <td className="p-4">
-                                <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                              <td className="p-3 sm:p-4 font-mono text-[10px] text-slate-400 font-bold hidden sm:table-cell">{product.sku}</td>
+                              <td className="p-3 sm:p-4">
+                                <span className="font-bold text-cyan-950 block">{product.name}</span>
+                                <span className="text-[10px] text-slate-400 sm:hidden block">{product.sku}</span>
+                              </td>
+                              <td className="p-3 sm:p-4 text-[10px] font-bold uppercase text-slate-400 hidden md:table-cell">{product.baseUnit}</td>
+                              <td className="p-3 sm:p-4 font-bold text-teal-900">₹{Number(product.basePrice).toFixed(2)}</td>
+                              <td className="p-3 sm:p-4 font-mono text-[10px] hidden lg:table-cell">{Number(product.density).toFixed(3)}</td>
+                              <td className="p-3 sm:p-4">
+                                <span className={`inline-flex px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                                   isLowStock ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
                                 }`}>
                                   {Number(product.currentStockBaseUnit).toLocaleString()} {product.baseUnit}
                                 </span>
                               </td>
-                              <td className="p-4 flex justify-center items-center space-x-2">
+                              <td className="p-3 sm:p-4 flex justify-center items-center space-x-1 sm:space-x-2">
                                 <button
                                   onClick={() => openEditModal(product)}
                                   className="p-1.5 border border-slate-200 rounded-lg hover:bg-teal-50 hover:border-teal-300 text-teal-800 transition-colors cursor-pointer"
@@ -634,21 +657,21 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-150 px-4 pb-4 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                <div className="flex justify-between items-center mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-slate-150 px-3 sm:px-4 pb-3 sm:pb-4 bg-white rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm">
                   <button
                     disabled={adminPage <= 1}
                     onClick={() => setAdminPage(p => Math.max(1, p - 1))}
-                    className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl disabled:opacity-50 transition-all cursor-pointer"
+                    className="px-3 sm:px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl disabled:opacity-50 transition-all cursor-pointer"
                   >
                     Previous
                   </button>
                   <span className="text-xs font-bold text-slate-500">
-                    Page {adminPage} of {adminTotalPages}
+                    {adminPage} / {adminTotalPages}
                   </span>
                   <button
                     disabled={adminPage >= adminTotalPages}
                     onClick={() => setAdminPage(p => Math.min(adminTotalPages, p + 1))}
-                    className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl disabled:opacity-50 transition-all cursor-pointer"
+                    className="px-3 sm:px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl disabled:opacity-50 transition-all cursor-pointer"
                   >
                     Next
                   </button>
@@ -660,25 +683,25 @@ export default function AdminPage() {
       </div>
 
       {(showAddModal || showEditModal) && (
-        <div className="fixed inset-0 bg-cyan-955 bg-cyan-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-100 animate-scale-in">
+        <div className="fixed inset-0 bg-cyan-955 bg-cyan-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative border border-slate-100 animate-scale-in max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => {
                 setShowAddModal(false);
                 setShowEditModal(false);
               }}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-650 cursor-pointer"
+              className="absolute top-3 sm:top-4 right-3 sm:right-4 text-slate-400 hover:text-slate-650 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg font-black text-cyan-950 mb-4 flex items-center space-x-2">
-              <FolderOpen className="w-5 h-5 text-teal-850" />
+            <h3 className="text-base sm:text-lg font-black text-cyan-950 mb-4 flex items-center space-x-2 pr-8">
+              <FolderOpen className="w-5 h-5 text-teal-850 shrink-0" />
               <span>{showAddModal ? "Create New Product" : "Update Product Specifications"}</span>
             </h3>
 
-            <form onSubmit={showAddModal ? handleAddProduct : handleEditProduct} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={showAddModal ? handleAddProduct : handleEditProduct} className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1 uppercase tracking-wide">SKU Code</label>
                   <input
@@ -714,7 +737,7 @@ export default function AdminPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1 uppercase tracking-wide">Base Unit</label>
                   <select

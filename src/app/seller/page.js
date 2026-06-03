@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import NotificationBell from "@/app/components/NotificationBell";
+import MobileSidebar from "@/app/components/MobileSidebar";
 import {
   Search,
   ShoppingCart,
@@ -12,13 +13,14 @@ import {
   X,
   PlusCircle,
   FileText,
-  Settings,
+
   Scale,
   Package,
   Activity,
   History,
   Trash2,
-  Check
+  Check,
+  Menu
 } from "lucide-react";import { convertQuantity, calculateUnitPrice, calculateTotalPrice } from "@/lib/conversions";
 
 const getCasNumber = (name) => {
@@ -44,6 +46,8 @@ export default function SellerPage() {
   const router = useRouter();
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
   
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -193,141 +197,269 @@ export default function SellerPage() {
   const gst = subtotal * 0.18;
   const total = subtotal + gst;
 
+  const sidebarContent = (
+    <aside className="w-full h-full bg-cyan-955 bg-cyan-950 text-white p-6 flex flex-col justify-between">
+      <div className="space-y-6">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center font-black text-white text-2xl shadow-lg shadow-emerald-500/15">
+            A
+          </div>
+          <div>
+            <h1 className="text-lg font-black tracking-wider bg-gradient-to-r from-white to-emerald-350 bg-clip-text text-transparent">AasaMedChem</h1>
+            <p className="text-[9px] text-emerald-400 font-bold tracking-widest uppercase">Solutions. Trust. Innovation.</p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+          <div className="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/25 shadow-inner">
+            SL
+          </div>
+          <div>
+            <span className="text-xs font-bold block text-white">Aasa Seller</span>
+            <span className="text-[10px] text-emerald-400/80 block font-semibold">Sales Agent Panel</span>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-[9px] font-bold text-teal-400/60 uppercase tracking-widest mb-3">
+            Main Menu
+          </p>
+          <nav className="space-y-1">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow-md shadow-emerald-700/20 flex items-center space-x-2.5 scale-[1.02]"
+            >
+              <Package className="w-4 h-4" />
+              <span>Browse Products</span>
+            </button>
+            <button
+              onClick={() => { router.push("/seller/checkout"); setSidebarOpen(false); }}
+              className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-teal-200 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center space-x-2.5"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              <span>Review Checkout</span>
+            </button>
+            <button
+              onClick={() => { router.push("/seller/orders"); setSidebarOpen(false); }}
+              className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-teal-200 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center space-x-2.5"
+            >
+              <History className="w-4 h-4" />
+              <span>Quotation History</span>
+            </button>
+          </nav>
+        </div>
+
+        <div>
+          <p className="text-[9px] font-bold text-teal-400/60 uppercase tracking-widest mb-3">
+            Filters Catalog
+          </p>
+          <div className="space-y-4">
+            <div>
+              <label className="text-[10px] text-teal-300/80 font-bold block mb-1 uppercase tracking-wide">Category</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-3 py-2.5 bg-cyan-900/60 border border-cyan-800 rounded-xl text-xs text-white focus:outline-none appearance-none cursor-pointer"
+              >
+                <option value="" className="bg-cyan-950 text-white">All Categories</option>
+                <option value="api" className="bg-cyan-950 text-white">APIs</option>
+                <option value="excipient" className="bg-cyan-950 text-white">Excipients</option>
+                <option value="solvent" className="bg-cyan-950 text-white">Solvents</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[10px] text-teal-300/80 font-bold block mb-1 uppercase tracking-wide">Unit Type</label>
+              <select
+                value={unitFilter}
+                onChange={(e) => setUnitFilter(e.target.value)}
+                className="w-full px-3 py-2.5 bg-cyan-900/60 border border-cyan-800 rounded-xl text-xs text-white focus:outline-none appearance-none cursor-pointer"
+              >
+                <option value="" className="bg-cyan-950 text-white">All Units</option>
+                <option value="g" className="bg-cyan-950 text-white">g (Gram)</option>
+                <option value="ml" className="bg-cyan-950 text-white">ml (Milliliter)</option>
+                <option value="pc" className="bg-cyan-950 text-white">pc (Piece)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button
+        onClick={handleLogout}
+        className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-teal-300 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center space-x-2.5 mt-8 border-t border-white/5 pt-4"
+      >
+        <LogOut className="w-4 h-4" />
+        <span>Logout Account</span>
+      </button>
+    </aside>
+  );
+
+  const cartPanelContent = (
+    <>
+      <div>
+        <div className="flex justify-between items-center pb-4 border-b border-slate-100 mb-4">
+          <h3 className="text-sm sm:text-base font-black text-cyan-955 text-cyan-950 flex items-center space-x-2">
+            <ShoppingCart className="w-5 h-5 text-emerald-600" />
+            <span>My Quotation</span>
+          </h3>
+          <div className="flex items-center space-x-2">
+            <span className="bg-emerald-50 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold">
+              {cart.length} items
+            </span>
+            {/* Close button for mobile cart drawer */}
+            <button
+              onClick={() => setCartOpen(false)}
+              className="lg:hidden p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {cart.length === 0 ? (
+          <div className="text-center py-12 sm:py-20 text-slate-400">
+            <ShoppingCart className="w-10 sm:w-12 h-10 sm:h-12 mx-auto mb-3 opacity-30 animate-pulse" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Empty quotation cart</p>
+          </div>
+        ) : (
+          <div className="space-y-3 sm:space-y-4 max-h-[40vh] lg:max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar">
+            {cart.map((item) => {
+              const unitPrice = calculateUnitPrice(
+                item.product.basePrice,
+                item.product.baseUnit,
+                item.unit,
+                item.product.density
+              );
+              const itemTotal = calculateTotalPrice(item.quantity, unitPrice);
+
+              return (
+                <div
+                  key={item.id}
+                  className="bg-slate-55 bg-slate-50 p-3 sm:p-3.5 rounded-2xl border border-slate-100 flex justify-between items-start hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex-1 pr-3">
+                    <h5 className="font-bold text-cyan-955 text-cyan-950 text-xs">{item.product.name}</h5>
+                    <p className="text-[10px] text-slate-450 font-semibold mt-0.5">
+                      {item.quantity} {item.unit} @ ₹{unitPrice.toFixed(2)}/{item.unit}
+                    </p>
+                    <span className="text-xs font-black text-teal-900 block mt-1">
+                      ₹{itemTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteCartItem(item.id)}
+                    className="text-slate-400 hover:text-red-655 hover:text-red-600 transition-colors p-1"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {cart.length > 0 && (
+        <div className="border-t border-slate-100 pt-4 mt-4 sm:mt-6">
+          <div className="space-y-2 mb-4 text-xs font-bold">
+            <div className="flex justify-between text-slate-400">
+              <span>Subtotal</span>
+              <span className="text-cyan-950">₹{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            </div>
+            <div className="flex justify-between text-slate-400">
+              <span>GST (18%)</span>
+              <span className="text-cyan-950">₹{gst.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            </div>
+            <div className="flex justify-between font-black text-cyan-955 text-cyan-950 text-sm pt-2 border-t border-dashed border-slate-200">
+              <span>Total (INR)</span>
+              <span className="text-emerald-700">₹{total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            </div>
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={handleClearCart}
+              className="w-1/3 border border-slate-200 hover:bg-slate-50 text-slate-700 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            >
+              Clear
+            </button>
+            <button
+              onClick={() => router.push("/seller/checkout")}
+              className="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+            >
+              <FileText className="w-4 h-4" />
+              <span>Submit Quotation</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       {notification && (
-        <div className="fixed bottom-6 right-6 bg-cyan-950 text-white px-5 py-3 rounded-xl shadow-2xl z-50 transition-all border border-emerald-500/50 flex items-center space-x-2 animate-bounce">
-          <Check className="w-4 h-4 text-emerald-450" />
+        <div className="fixed bottom-6 right-4 sm:right-6 bg-cyan-950 text-white px-4 sm:px-5 py-3 rounded-xl shadow-2xl z-50 transition-all border border-emerald-500/50 flex items-center space-x-2 animate-bounce max-w-[90vw]">
+          <Check className="w-4 h-4 text-emerald-450 shrink-0" />
           <span className="text-xs font-bold tracking-wide">{notification}</span>
         </div>
       )}
 
       <div className="flex-1 flex flex-col lg:flex-row">
-        <aside className="w-full lg:w-64 bg-cyan-955 bg-cyan-950 text-white p-6 flex flex-col justify-between border-t border-cyan-900/50 lg:border-t-0 shrink-0">
-          <div className="space-y-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center font-black text-white text-2xl shadow-lg shadow-emerald-500/15">
-                A
-              </div>
-              <div>
-                <h1 className="text-lg font-black tracking-wider bg-gradient-to-r from-white to-emerald-350 bg-clip-text text-transparent">AasaMedChem</h1>
-                <p className="text-[9px] text-emerald-400 font-bold tracking-widest uppercase">Solutions. Trust. Innovation.</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3 bg-white/5 p-3 rounded-2xl border border-white/10">
-              <div className="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/25 shadow-inner">
-                SL
-              </div>
-              <div>
-                <span className="text-xs font-bold block text-white">Aasa Seller</span>
-                <span className="text-[10px] text-emerald-400/80 block font-semibold font-semibold">Sales Agent Panel</span>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-[9px] font-bold text-teal-400/60 uppercase tracking-widest mb-3">
-                Main Menu
-              </p>
-              <nav className="space-y-1">
-                <button
-                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow-md shadow-emerald-700/20 flex items-center space-x-2.5 scale-[1.02]"
-                >
-                  <Package className="w-4 h-4" />
-                  <span>Browse Products</span>
-                </button>
-                <button
-                  onClick={() => router.push("/seller/checkout")}
-                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-teal-200 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center space-x-2.5"
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  <span>Review Checkout</span>
-                </button>
-                <button
-                  onClick={() => router.push("/seller/orders")}
-                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-teal-200 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center space-x-2.5"
-                >
-                  <History className="w-4 h-4" />
-                  <span>Quotation History</span>
-                </button>
-              </nav>
-            </div>
-
-            <div>
-              <p className="text-[9px] font-bold text-teal-400/60 uppercase tracking-widest mb-3">
-                Filters Catalog
-              </p>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-[10px] text-teal-300/80 font-bold block mb-1 uppercase tracking-wide">Category</label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-cyan-900/60 border border-cyan-800 rounded-xl text-xs text-white focus:outline-none appearance-none cursor-pointer"
-                  >
-                    <option value="" className="bg-cyan-950 text-white">All Categories</option>
-                    <option value="api" className="bg-cyan-950 text-white">APIs</option>
-                    <option value="excipient" className="bg-cyan-950 text-white">Excipients</option>
-                    <option value="solvent" className="bg-cyan-950 text-white">Solvents</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-[10px] text-teal-300/80 font-bold block mb-1 uppercase tracking-wide">Unit Type</label>
-                  <select
-                    value={unitFilter}
-                    onChange={(e) => setUnitFilter(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-cyan-900/60 border border-cyan-800 rounded-xl text-xs text-white focus:outline-none appearance-none cursor-pointer"
-                  >
-                    <option value="" className="bg-cyan-950 text-white">All Units</option>
-                    <option value="g" className="bg-cyan-950 text-white">g (Gram)</option>
-                    <option value="ml" className="bg-cyan-950 text-white">ml (Milliliter)</option>
-                    <option value="pc" className="bg-cyan-950 text-white">pc (Piece)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={handleLogout}
-            className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-teal-300 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center space-x-2.5 mt-8 border-t border-white/5 pt-4"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Logout Account</span>
-          </button>
-        </aside>
+        <MobileSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)}>
+          {sidebarContent}
+        </MobileSidebar>
 
         <main className="flex-1 flex flex-col min-w-0">
-          <header className="bg-white border-b border-slate-100 py-4 px-6 md:px-8 flex justify-between items-center shadow-sm sticky top-0 z-20">
-            <div className="relative w-80 hidden md:block">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search products by SKU, name..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 pl-9 text-xs text-slate-900 focus:outline-none focus:border-teal-650 placeholder-slate-400 font-medium"
-              />
-              <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+          <header className="bg-white border-b border-slate-100 py-3 sm:py-4 px-4 sm:px-6 md:px-8 flex justify-between items-center shadow-sm sticky top-0 z-20">
+            <div className="flex items-center space-x-3">
+              {/* Mobile hamburger */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 rounded-xl hover:bg-slate-100 transition-colors text-slate-600"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              {/* Mobile search */}
+              <div className="relative w-full max-w-xs sm:max-w-sm md:w-80">
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search products..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 pl-9 text-xs text-slate-900 focus:outline-none focus:border-teal-650 placeholder-slate-400 font-medium"
+                />
+                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+              </div>
             </div>
 
-            <div className="flex items-center space-x-4 text-slate-500">
-              <span className="text-[10px] font-bold text-teal-850 bg-teal-50 px-3 py-1 rounded-full uppercase tracking-wider">
+            <div className="flex items-center space-x-2 sm:space-x-4 text-slate-500">
+              <span className="text-[10px] font-bold text-teal-850 bg-teal-50 px-2 sm:px-3 py-1 rounded-full uppercase tracking-wider hidden sm:inline">
                 Active Catalog
               </span>
+              {/* Mobile cart toggle */}
+              <button
+                onClick={() => setCartOpen(true)}
+                className="lg:hidden relative p-2 hover:bg-slate-100 rounded-xl cursor-pointer text-slate-600"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {cart.length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {cart.length}
+                  </span>
+                )}
+              </button>
               <button className="p-2 hover:bg-slate-100 rounded-xl relative cursor-pointer text-slate-655">
                 <NotificationBell />
               </button>
-              <button className="p-2 hover:bg-slate-100 rounded-xl cursor-pointer text-slate-655">
-                <Settings className="w-4 h-4" />
-              </button>
+
             </div>
           </header>
 
-          <div className="flex-1 p-6 md:p-8 overflow-y-auto max-h-[calc(100vh-65px)] custom-scrollbar">
-            <div className="flex justify-between items-center mb-6">
+          <div className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto max-h-[calc(100vh-65px)] custom-scrollbar">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
               <div className="flex flex-col">
-                <h3 className="text-base font-black text-cyan-950">Products Catalog</h3>
+                <h3 className="text-sm sm:text-base font-black text-cyan-950">Products Catalog</h3>
                 <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block mt-0.5">Showing products list</span>
               </div>
               <select
@@ -342,11 +474,11 @@ export default function SellerPage() {
             </div>
 
             {products.length === 0 ? (
-              <div className="text-center py-16 bg-white rounded-3xl border border-slate-100 shadow-sm animate-pulse">
-                <p className="text-slate-500 font-bold">No active products found matching filters.</p>
+              <div className="text-center py-12 sm:py-16 bg-white rounded-3xl border border-slate-100 shadow-sm animate-pulse">
+                <p className="text-slate-500 font-bold text-sm">No active products found matching filters.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 animate-fade-in">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 animate-fade-in">
                 {products.map((product) => {
                   const isLowStock = Number(product.currentStockBaseUnit) < 1000;
                   const casNum = getCasNumber(product.name);
@@ -354,10 +486,10 @@ export default function SellerPage() {
                   return (
                     <div
                       key={product.id}
-                      className="bg-white rounded-3xl border border-slate-100 p-6 flex flex-col justify-between hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 relative group"
+                      className="bg-white rounded-2xl sm:rounded-3xl border border-slate-100 p-4 sm:p-6 flex flex-col justify-between hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 relative group"
                     >
                       <div>
-                        <div className="flex justify-between items-start mb-3">
+                        <div className="flex justify-between items-start mb-2 sm:mb-3">
                           <div className="flex flex-col">
                             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">SKU: {product.sku}</span>
                             <span className="text-[9px] font-bold text-emerald-600 tracking-wider">CAS: {casNum}</span>
@@ -369,20 +501,20 @@ export default function SellerPage() {
                           </span>
                         </div>
                         
-                        <div className="w-full aspect-[4/3] bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-2xl flex items-center justify-center border border-slate-100 mb-4 group-hover:scale-[1.01] transition-all">
+                        <div className="w-full aspect-[4/3] bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl sm:rounded-2xl flex items-center justify-center border border-slate-100 mb-3 sm:mb-4 group-hover:scale-[1.01] transition-all">
                           <div className="flex flex-col items-center space-y-2">
-                            <div className="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-teal-850 shadow-sm">
-                              <Scale className="w-6 h-6" />
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl sm:rounded-2xl border border-slate-100 flex items-center justify-center text-teal-850 shadow-sm">
+                              <Scale className="w-5 sm:w-6 h-5 sm:h-6" />
                             </div>
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{catLabel}</span>
                           </div>
                         </div>
 
                         <h4 className="text-sm font-black text-cyan-950 mb-1 group-hover:text-teal-650 transition-colors">{product.name}</h4>
-                        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4 font-medium">{product.description}</p>
+                        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-3 sm:mb-4 font-medium">{product.description}</p>
                       </div>
 
-                      <div className="border-t border-slate-50 pt-4 flex justify-between items-center">
+                      <div className="border-t border-slate-50 pt-3 sm:pt-4 flex justify-between items-center">
                         <div>
                           <span className="text-[9px] text-slate-400 block font-bold uppercase tracking-wider">Base Price</span>
                           <span className="text-base font-black text-cyan-950">₹{Number(product.basePrice).toFixed(2)}</span>
@@ -401,21 +533,21 @@ export default function SellerPage() {
               </div>
             )}
 
-            <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-150 bg-white rounded-3xl border border-slate-100 shadow-sm p-4">
+            <div className="flex justify-between items-center mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-150 bg-white rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm p-3 sm:p-4">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage(p => Math.max(1, p - 1))}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl disabled:opacity-50 transition-all cursor-pointer"
+                className="px-3 sm:px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl disabled:opacity-50 transition-all cursor-pointer"
               >
                 Previous
               </button>
               <span className="text-xs font-bold text-slate-500">
-                Page {page} of {totalPages}
+                {page} / {totalPages}
               </span>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl disabled:opacity-50 transition-all cursor-pointer"
+                className="px-3 sm:px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl disabled:opacity-50 transition-all cursor-pointer"
               >
                 Next
               </button>
@@ -423,103 +555,42 @@ export default function SellerPage() {
           </div>
         </main>
 
-        <section className="w-full lg:w-96 bg-white border-t lg:border-t-0 lg:border-l border-slate-150 p-6 flex flex-col justify-between shrink-0">
-          <div>
-            <div className="flex justify-between items-center pb-4 border-b border-slate-100 mb-4">
-              <h3 className="text-base font-black text-cyan-955 text-cyan-950 flex items-center space-x-2">
-                <ShoppingCart className="w-5 h-5 text-emerald-600" />
-                <span>My Quotation</span>
-              </h3>
-              <span className="bg-emerald-50 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold">
-                {cart.length} items
-              </span>
-            </div>
-
-            {cart.length === 0 ? (
-              <div className="text-center py-20 text-slate-400">
-                <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-30 animate-pulse" />
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Empty quotation cart</p>
-              </div>
-            ) : (
-              <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar">
-                {cart.map((item) => {
-                  const unitPrice = calculateUnitPrice(
-                    item.product.basePrice,
-                    item.product.baseUnit,
-                    item.unit,
-                    item.product.density
-                  );
-                  const itemTotal = calculateTotalPrice(item.quantity, unitPrice);
-
-                  return (
-                    <div
-                      key={item.id}
-                      className="bg-slate-55 bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex justify-between items-start hover:bg-slate-50 transition-colors"
-                    >
-                      <div className="flex-1 pr-3">
-                        <h5 className="font-bold text-cyan-955 text-cyan-950 text-xs">{item.product.name}</h5>
-                        <p className="text-[10px] text-slate-450 font-semibold mt-0.5">
-                          {item.quantity} {item.unit} @ ₹{unitPrice.toFixed(2)}/{item.unit}
-                        </p>
-                        <span className="text-xs font-black text-teal-900 block mt-1">
-                          ₹{itemTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteCartItem(item.id)}
-                        className="text-slate-400 hover:text-red-655 hover:text-red-600 transition-colors p-1"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {cart.length > 0 && (
-            <div className="border-t border-slate-100 pt-4 mt-6">
-              <div className="space-y-2 mb-4 text-xs font-bold">
-                <div className="flex justify-between text-slate-400">
-                  <span>Subtotal</span>
-                  <span className="text-cyan-950">₹{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>GST (18%)</span>
-                  <span className="text-cyan-950">₹{gst.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                </div>
-                <div className="flex justify-between font-black text-cyan-955 text-cyan-950 text-sm pt-2 border-t border-dashed border-slate-200">
-                  <span>Total (INR)</span>
-                  <span className="text-emerald-700">₹{total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                </div>
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={handleClearCart}
-                  className="w-1/3 border border-slate-200 hover:bg-slate-50 text-slate-700 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
-                >
-                  Clear Cart
-                </button>
-                <button
-                  onClick={() => router.push("/seller/checkout")}
-                  className="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center space-x-1.5"
-                >
-                  <FileText className="w-4 h-4" />
-                  <span>Submit Quotation</span>
-                </button>
-              </div>
-            </div>
-          )}
+        {/* Desktop cart panel */}
+        <section className="hidden lg:flex w-96 bg-white border-l border-slate-150 p-6 flex-col justify-between shrink-0">
+          {cartPanelContent}
         </section>
+
+        {/* Mobile cart drawer */}
+        {cartOpen && (
+          <div className="lg:hidden fixed inset-0 z-40" aria-modal="true">
+            <div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setCartOpen(false)}
+            />
+            <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-white z-50 flex flex-col overflow-y-auto shadow-2xl animate-slide-in-right-drawer p-5 sm:p-6">
+              {cartPanelContent}
+            </div>
+          </div>
+        )}
       </div>
 
+      {/* Mobile floating cart button (when cart drawer is closed and has items) */}
+      {cart.length > 0 && !cartOpen && (
+        <button
+          onClick={() => setCartOpen(true)}
+          className="lg:hidden fixed bottom-6 right-4 bg-emerald-600 text-white p-4 rounded-2xl shadow-2xl z-30 flex items-center space-x-2 animate-scale-in"
+        >
+          <ShoppingCart className="w-5 h-5" />
+          <span className="text-xs font-bold">{cart.length} items · ₹{total.toFixed(0)}</span>
+        </button>
+      )}
+
       {selectedProduct && (
-        <div className="fixed inset-0 bg-cyan-955 bg-cyan-955 bg-cyan-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-100 animate-scale-in">
+        <div className="fixed inset-0 bg-cyan-955 bg-cyan-955 bg-cyan-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative border border-slate-100 animate-scale-in max-h-[90vh] overflow-y-auto">
             <button
               onClick={closeProductModal}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-655 cursor-pointer"
+              className="absolute top-3 sm:top-4 right-3 sm:right-4 text-slate-400 hover:text-slate-655 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -540,13 +611,13 @@ export default function SellerPage() {
               </span>
             </div>
 
-            <h3 className="text-base font-black text-cyan-950 mb-2">
+            <h3 className="text-sm sm:text-base font-black text-cyan-950 mb-2">
               {selectedProduct.name}
             </h3>
-            <p className="text-xs text-slate-400 mb-4 font-medium">{selectedProduct.description}</p>
+            <p className="text-xs text-slate-400 mb-3 sm:mb-4 font-medium">{selectedProduct.description}</p>
 
-            <div className="bg-slate-50 p-4 border border-slate-100 rounded-2xl mb-6">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="bg-slate-50 p-3 sm:p-4 border border-slate-100 rounded-xl sm:rounded-2xl mb-4 sm:mb-6">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="text-[10px] font-bold text-slate-700 uppercase tracking-wide block mb-1">
                     Quantity
@@ -597,13 +668,13 @@ export default function SellerPage() {
               </div>
 
               {calcQty > 0 && (
-                <div className="border-t border-slate-200 mt-4 pt-3 text-xs text-slate-600 space-y-1 font-semibold">
+                <div className="border-t border-slate-200 mt-3 sm:mt-4 pt-3 text-xs text-slate-600 space-y-1 font-semibold">
                   <div className="flex justify-between">
                     <span>Base price:</span>
                     <span className="text-cyan-950">₹{Number(selectedProduct.basePrice).toFixed(2)}/{selectedProduct.baseUnit}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Price per Unit ({calcUnit}):</span>
+                    <span>Price/{calcUnit}:</span>
                     <span className="text-cyan-950">
                       ₹
                       {calculateUnitPrice(
@@ -616,7 +687,7 @@ export default function SellerPage() {
                     </span>
                   </div>
                   <div className="flex justify-between text-sm font-black text-cyan-955 text-cyan-950 pt-1.5 border-t border-dashed border-slate-250">
-                    <span>Price Calculation:</span>
+                    <span>Total:</span>
                     <span className="text-emerald-705 text-emerald-600">
                       ₹
                       {calculateTotalPrice(

@@ -1,9 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { neonConfig } from "@neondatabase/serverless";
-
-// Node 18+ on Vercel has a native global WebSocket — no polyfill needed.
-// Older local Node versions need the 'ws' package as a fallback.
 if (typeof globalThis.WebSocket === "undefined") {
   const { default: ws } = await import("ws");
   neonConfig.webSocketConstructor = ws;

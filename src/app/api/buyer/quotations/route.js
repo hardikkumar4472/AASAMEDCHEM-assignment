@@ -4,6 +4,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { convertQuantity, calculateUnitPrice, calculateTotalPrice } from "@/lib/conversions";
 import { createNotification, notifyAllAdmins } from "@/lib/notifications";
+import { quotationLimiter, getIP, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function GET(req) {
   try {
@@ -29,6 +30,11 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
+  // Rate limit: 20 order submissions per minute per IP
+  const ip = getIP(req);
+  const limit = quotationLimiter.check(ip);
+  if (!limit.success) return rateLimitResponse(limit.resetAt);
+
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "BUYER") {

@@ -76,3 +76,72 @@ body {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in-right-drawer {
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* Touch-friendly scrollbar on mobile */
+@media (max-width: 768px) {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+  
+  /* Prevent horizontal overflow on mobile */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Mobile table wrapper for horizontal scroll hint */
+.table-scroll-hint {
+  position: relative;
+}
+.table-scroll-hint::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 24px;
+  background: linear-gradient(to left, rgba(255,255,255,0.95), transparent);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+/* Mobile-friendly tap targets */
+@media (max-width: 768px) {
+  button, a, select, input {
+    min-height: 44px;
+  }
+  
+  select {
+    min-height: 44px;
+  }
+}
