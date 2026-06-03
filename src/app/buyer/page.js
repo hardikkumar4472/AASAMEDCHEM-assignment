@@ -41,7 +41,7 @@ const getCategoryLabel = (name) => {
   return "Intermediates";
 };
 
-export default function SellerPage() {
+export default function BuyerPage() {
   const router = useRouter();
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
@@ -87,7 +87,7 @@ export default function SellerPage() {
         page: page.toString(),
         limit: "6",
       });
-      const res = await fetch(`/api/seller/products?${q.toString()}`);
+      const res = await fetch(`/api/buyer/products?${q.toString()}`);
       const data = await res.json();
       setProducts(data.products || []);
       setTotalPages(data.pagination?.totalPages || 1);
@@ -98,7 +98,7 @@ export default function SellerPage() {
 
   const fetchCart = async () => {
     try {
-      const res = await fetch("/api/seller/cart");
+      const res = await fetch("/api/buyer/cart");
       const data = await res.json();
       setCart(data || []);
     } catch (err) {
@@ -133,7 +133,7 @@ export default function SellerPage() {
   const handleAddToCart = async () => {
     setModalError("");
     try {
-      const res = await fetch("/api/seller/cart", {
+      const res = await fetch("/api/buyer/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -144,7 +144,7 @@ export default function SellerPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        setNotification("Product added to quotation!");
+        setNotification("Product added to order cart!");
         setTimeout(() => setNotification(""), 3000);
         fetchCart();
         closeProductModal();
@@ -158,7 +158,7 @@ export default function SellerPage() {
 
   const handleDeleteCartItem = async (id) => {
     try {
-      const res = await fetch(`/api/seller/cart?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/buyer/cart?id=${id}`, { method: "DELETE" });
       if (res.ok) {
         fetchCart();
       }
@@ -169,7 +169,7 @@ export default function SellerPage() {
 
   const handleClearCart = async () => {
     try {
-      const res = await fetch("/api/seller/cart", { method: "DELETE" });
+      const res = await fetch("/api/buyer/cart", { method: "DELETE" });
       if (res.ok) {
         setCart([]);
       }
@@ -204,7 +204,7 @@ export default function SellerPage() {
       )}
 
       <div className="flex-1 flex flex-col lg:flex-row">
-        <aside className="w-full lg:w-64 bg-cyan-955 bg-cyan-950 text-white p-6 flex flex-col justify-between border-t border-cyan-900/50 lg:border-t-0 shrink-0">
+        <aside className="w-full lg:w-64 bg-cyan-950 text-white p-6 flex flex-col justify-between border-t border-cyan-900/50 lg:border-t-0 shrink-0">
           <div className="space-y-6">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center font-black text-white text-2xl shadow-lg shadow-emerald-500/15">
@@ -218,11 +218,11 @@ export default function SellerPage() {
 
             <div className="flex items-center space-x-3 bg-white/5 p-3 rounded-2xl border border-white/10">
               <div className="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/25 shadow-inner">
-                SL
+                BY
               </div>
               <div>
-                <span className="text-xs font-bold block text-white">Aasa Seller</span>
-                <span className="text-[10px] text-emerald-400/80 block font-semibold font-semibold">Sales Agent Panel</span>
+                <span className="text-xs font-bold block text-white">Aasa Buyer</span>
+                <span className="text-[10px] text-emerald-400/80 block font-semibold">Corporate Buyer Panel</span>
               </div>
             </div>
 
@@ -238,11 +238,18 @@ export default function SellerPage() {
                   <span>Browse Products</span>
                 </button>
                 <button
-                  onClick={() => router.push("/seller/checkout")}
+                  onClick={() => router.push("/buyer/checkout")}
                   className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-teal-200 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center space-x-2.5"
                 >
                   <ShoppingCart className="w-4 h-4" />
                   <span>Review Checkout</span>
+                </button>
+                <button
+                  onClick={() => router.push("/buyer/orders")}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold text-teal-200 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center space-x-2.5"
+                >
+                  <History className="w-4 h-4" />
+                  <span>Purchase History</span>
                 </button>
               </nav>
             </div>
@@ -307,7 +314,7 @@ export default function SellerPage() {
 
             <div className="flex items-center space-x-4 text-slate-500">
               <span className="text-[10px] font-bold text-teal-850 bg-teal-50 px-3 py-1 rounded-full uppercase tracking-wider">
-                Active Catalog
+                Corporate Store
               </span>
               <button className="p-2 hover:bg-slate-100 rounded-xl relative cursor-pointer text-slate-655">
                 <Bell className="w-4 h-4" />
@@ -321,8 +328,8 @@ export default function SellerPage() {
           <div className="flex-1 p-6 md:p-8 overflow-y-auto max-h-[calc(100vh-65px)] custom-scrollbar">
             <div className="flex justify-between items-center mb-6">
               <div className="flex flex-col">
-                <h3 className="text-base font-black text-cyan-950">Products Catalog</h3>
-                <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block mt-0.5">Showing products list</span>
+                <h3 className="text-base font-black text-cyan-950">Chemical Products</h3>
+                <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block mt-0.5">Explore catalog catalog</span>
               </div>
               <select
                 value={sortBy}
@@ -420,9 +427,9 @@ export default function SellerPage() {
         <section className="w-full lg:w-96 bg-white border-t lg:border-t-0 lg:border-l border-slate-150 p-6 flex flex-col justify-between shrink-0">
           <div>
             <div className="flex justify-between items-center pb-4 border-b border-slate-100 mb-4">
-              <h3 className="text-base font-black text-cyan-955 text-cyan-950 flex items-center space-x-2">
+              <h3 className="text-base font-black text-cyan-950 flex items-center space-x-2">
                 <ShoppingCart className="w-5 h-5 text-emerald-600" />
-                <span>My Quotation</span>
+                <span>My Cart</span>
               </h3>
               <span className="bg-emerald-50 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold">
                 {cart.length} items
@@ -432,7 +439,7 @@ export default function SellerPage() {
             {cart.length === 0 ? (
               <div className="text-center py-20 text-slate-400">
                 <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-30 animate-pulse" />
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Empty quotation cart</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Empty cart items</p>
               </div>
             ) : (
               <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar">
@@ -448,10 +455,10 @@ export default function SellerPage() {
                   return (
                     <div
                       key={item.id}
-                      className="bg-slate-55 bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex justify-between items-start hover:bg-slate-50 transition-colors"
+                      className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex justify-between items-start hover:bg-slate-50 transition-colors"
                     >
                       <div className="flex-1 pr-3">
-                        <h5 className="font-bold text-cyan-955 text-cyan-950 text-xs">{item.product.name}</h5>
+                        <h5 className="font-bold text-cyan-950 text-xs">{item.product.name}</h5>
                         <p className="text-[10px] text-slate-450 font-semibold mt-0.5">
                           {item.quantity} {item.unit} @ ₹{unitPrice.toFixed(2)}/{item.unit}
                         </p>
@@ -496,11 +503,11 @@ export default function SellerPage() {
                   Clear Cart
                 </button>
                 <button
-                  onClick={() => router.push("/seller/checkout")}
+                  onClick={() => router.push("/buyer/checkout")}
                   className="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center space-x-1.5"
                 >
                   <FileText className="w-4 h-4" />
-                  <span>Submit Quotation</span>
+                  <span>Place Order</span>
                 </button>
               </div>
             </div>
@@ -509,7 +516,7 @@ export default function SellerPage() {
       </div>
 
       {selectedProduct && (
-        <div className="fixed inset-0 bg-cyan-955 bg-cyan-955 bg-cyan-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-cyan-955 bg-cyan-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-100 animate-scale-in">
             <button
               onClick={closeProductModal}
@@ -534,7 +541,7 @@ export default function SellerPage() {
               </span>
             </div>
 
-            <h3 className="text-base font-black text-cyan-950 mb-2">
+            <h3 className="text-base font-black text-cyan-955 text-cyan-950 mb-2">
               {selectedProduct.name}
             </h3>
             <p className="text-xs text-slate-400 mb-4 font-medium">{selectedProduct.description}</p>
@@ -591,14 +598,14 @@ export default function SellerPage() {
               </div>
 
               {calcQty > 0 && (
-                <div className="border-t border-slate-200 mt-4 pt-3 text-xs text-slate-600 space-y-1 font-semibold">
+                <div className="border-t border-slate-200 mt-4 pt-3 text-xs text-slate-650 text-slate-600 space-y-1 font-semibold">
                   <div className="flex justify-between">
                     <span>Base price:</span>
-                    <span className="text-cyan-950">₹{Number(selectedProduct.basePrice).toFixed(2)}/{selectedProduct.baseUnit}</span>
+                    <span className="text-cyan-950 font-bold">₹{Number(selectedProduct.basePrice).toFixed(2)}/{selectedProduct.baseUnit}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Price per Unit ({calcUnit}):</span>
-                    <span className="text-cyan-950">
+                    <span className="text-cyan-950 font-bold">
                       ₹
                       {calculateUnitPrice(
                         selectedProduct.basePrice,
@@ -611,7 +618,7 @@ export default function SellerPage() {
                   </div>
                   <div className="flex justify-between text-sm font-black text-cyan-955 text-cyan-950 pt-1.5 border-t border-dashed border-slate-250">
                     <span>Price Calculation:</span>
-                    <span className="text-emerald-705 text-emerald-600">
+                    <span className="text-emerald-705 text-emerald-600 font-extrabold">
                       ₹
                       {calculateTotalPrice(
                         calcQty,
@@ -629,7 +636,7 @@ export default function SellerPage() {
             </div>
 
             {modalError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2.5 rounded-xl text-xs font-bold mb-4">
+              <div className="bg-red-50 border border-red-200 text-red-705 text-red-700 px-4 py-2.5 rounded-xl text-xs font-bold mb-4">
                 {modalError}
               </div>
             )}
@@ -637,7 +644,7 @@ export default function SellerPage() {
             <div className="flex space-x-3">
               <button
                 onClick={closeProductModal}
-                className="w-1/2 border border-slate-200 hover:bg-slate-50 text-slate-700 py-3 rounded-xl text-xs font-bold cursor-pointer"
+                className="w-1/2 border border-slate-200 hover:bg-slate-50 text-slate-705 text-slate-700 py-3 rounded-xl text-xs font-bold cursor-pointer"
               >
                 Cancel
               </button>
@@ -645,7 +652,7 @@ export default function SellerPage() {
                 onClick={handleAddToCart}
                 className="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-xs font-bold cursor-pointer transition-all shadow-md shadow-emerald-500/10 hover:scale-[1.01]"
               >
-                Add to Quote
+                Add to Cart
               </button>
             </div>
           </div>

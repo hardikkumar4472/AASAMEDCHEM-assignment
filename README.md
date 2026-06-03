@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# AasaMedChem Inventory & Order Management System
 
-## Getting Started
+A premium, high-precision inventory and order management system built with Next.js, Prisma, Neon PostgreSQL, TailwindCSS, and NextAuth.
 
-First, run the development server:
+## System Architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```mermaid
+graph TD
+  User([App User]) -->|Login Credentials| NextAuth[NextAuth Authentication]
+  NextAuth -->|Role Discovery & Session| Router[Middleware Router]
+  
+  Router -->|Role: ADMIN| AdminDashboard[Admin Panel]
+  Router -->|Role: SELLER| SellerDashboard[Seller Panel]
+  Router -->|Role: BUYER| BuyerDashboard[Buyer Panel]
+
+  SellerDashboard -->|Convert Units| ConversionEngine[Precision Conversion Engine]
+  SellerDashboard -->|Add Items| CartService[Live Stock Validation Cart]
+  CartService -->|Submit Checkout| QuotationService[Transaction System]
+  
+  AdminDashboard -->|Manage Products| ProductAPI[Product CRUD API]
+  AdminDashboard -->|Process Quotations| AdminQuotationAPI[Quotation Approval API]
+
+  AdminQuotationAPI -->|Prisma Transaction| DB[(Neon PostgreSQL DB)]
+  ProductAPI -->|Prisma Client| DB
+  QuotationService -->|Prisma Client| DB
+  CartService -->|Stock Check| DB
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Role-Based Credentials
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- **Admin Account**: `admin@gmail.com` / `admin123`
+- **Seller Account**: `seller@gmail.com` / `seller123`
+- **Buyer Account**: `buyer@gmail.com` / `buyer123`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Features
 
-## Learn More
+- **Dynamic Role-Based Redirection**: Users are automatically authenticated and directed to their specific panel layout depending on their DB role.
+- **Precision Conversion Engine**: Handles high-precision units scaling across Weight (g, kg), Volume (ml, l), and Count (units) using real-time density factor values.
+- **Stock-Aware Cart Control**: Computes and restricts quantity submissions instantly against available database counts.
+- **Atomic Transactional Checkout**: Deducts product volumes reliably upon Admin quotation approval using robust Prisma transactions.
 
-To learn more about Next.js, take a look at the following resources:
+## Installation & Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Install Project Dependencies**
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Configure Environment Variables**
+   Create a `.env` file in the root workspace folder:
+   ```env
+   DATABASE_URL="postgresql://user:password@host/dbname?sslmode=require"
+   NEXTAUTH_SECRET="AASAMEDCHEM"
+   NEXTAUTH_URL="http://localhost:3000"
+   ```
 
-## Deploy on Vercel
+3. **Synchronize DB Schema**
+   ```bash
+   npx prisma db push
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Populate Database Records**
+   ```bash
+   npx prisma db seed
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. **Start Dev Server**
+   ```bash
+   npm run dev
+   ```
