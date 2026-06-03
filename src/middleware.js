@@ -13,6 +13,10 @@ export default withAuth(
     if ((path.startsWith("/seller") || path.startsWith("/api/seller")) && token?.role !== "SELLER" && token?.role !== "ADMIN") {
       return NextResponse.rewrite(new URL("/auth/login?error=AccessDenied", req.url));
     }
+
+    if ((path.startsWith("/buyer") || path.startsWith("/api/buyer")) && token?.role !== "BUYER" && token?.role !== "ADMIN") {
+      return NextResponse.rewrite(new URL("/auth/login?error=AccessDenied", req.url));
+    }
   },
   {
     callbacks: {
@@ -25,7 +29,9 @@ export const config = {
   matcher: [
     "/admin/:path*",
     "/seller/:path*",
+    "/buyer/:path*",
     "/api/admin/:path*",
     "/api/seller/:path*",
+    "/api/buyer/:path*",
   ],
 };
